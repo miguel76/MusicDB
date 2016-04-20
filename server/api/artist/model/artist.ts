@@ -6,4 +6,5 @@ export default class Artist {
   pastMembers: Array<string>;
   currentBands: Array<string>;
   pastBands: Array<string>;
+  relatedArtists: Array<string>;
 }

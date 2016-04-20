@@ -2,50 +2,95 @@
 
 import Artist from '../model/artist';
 import * as Promise from 'bluebird';
+import * as _ from 'lodash'
 
 var SparqlClient = require('sparql-client');
 
 var endpoint = 'http://dbpedia.org/sparql';
 
-var currentBandsQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
+var bandMemberQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT ?Name WHERE {\
+      SELECT DISTINCT ?BandName, ?FormerBandName, ?MemberName, ?FormerMemberName WHERE {\
         ?Artist dbp:name ?ArtistName .\
         FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
-        ?Band dbo:bandMember ?Artist .\
-        ?Band dbp:name ?Name\
+        OPTIONAL {\
+          ?Band dbo:bandMember ?Artist .\
+          ?Band dbp:name ?BandName .\
+        } .\
+        OPTIONAL {\
+          ?FormerBand dbo:formerBandMember ?Artist .\
+          ?FormerBand dbp:name ?FormerBandName\
+        } .\
+        OPTIONAL {\
+          ?Artist dbo:bandMember ?Member .\
+          ?Member dbp:name ?MemberName\
+        } .\
+        OPTIONAL {\
+          ?Artist dbo:formerBandMember ?FormerMember .\
+          ?FormerMember dbp:name ?FormerMemberName\
+        } .\
       }";
 
-var pastBandsQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
+var bandRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT ?Name WHERE {\
+      SELECT DISTINCT ?Related1Name, ?Related2Name, ?Related3Name, ?Related4Name WHERE {\
         ?Artist dbp:name ?ArtistName .\
         FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
-        ?Band dbo:formerBandMember ?Artist .\
-        ?Band dbp:name ?Name\
-      }";
+        OPTIONAL {\
+          ?Artist dbo:bandMember ?Member .\
+          OPTIONAL {\
+            ?Related1 dbo:bandMember ?Member .\
+            ?Related1 dbp:name ?Related1Name\
+          } .\
+          OPTIONAL {\
+            ?Related2 dbo:formerBandMember ?Member .\
+            ?Related2 dbp:name ?Related2Name\
+          }\
+        } .\
+        OPTIONAL {\
+          ?Artist dbo:formerBandMember ?FormerMember .\
+          OPTIONAL {\
+            ?Related3 dbo:bandMember ?FormerMember .\
+            ?Related3 dbp:name ?Related3Name\
+          } .\
+          OPTIONAL {\
+            ?Related4 dbo:formerBandMember ?FormerMember .\
+            ?Related4 dbp:name ?Related4Name\
+          }\
+        }\
+      }"
 
-var currentMembersQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
+var artistRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT ?Name WHERE {\
+      SELECT DISTINCT ?Related1Name, ?Related2Name, ?Related3Name, ?Related4Name WHERE {\
         ?Artist dbp:name ?ArtistName .\
         FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
-        ?Artist dbo:bandMember ?Member .\
-        ?Member dbp:name ?Name\
-      }";
-
-var pastMembersQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
-      PREFIX dbo: <http://dbpedia.org/ontology/>\
-      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT ?Name WHERE {\
-        ?Artist dbp:name ?ArtistName .\
-        FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
-        ?Artist dbo:formerBandMember ?Member .\
-        ?Member dbp:name ?Name\
-      }";
+        OPTIONAL {\
+          ?Band dbo:bandMember ?Artist .\
+          OPTIONAL {\
+            ?Band dbo:bandMember ?Related1 .\
+            ?Related1 dbp:name ?Related1Name\
+          } .\
+          OPTIONAL {\
+            ?Band dbo:formerBandMember ?Related2 .\
+            ?Related2 dbp:name ?Related2Name\
+          }\
+        } .\
+        OPTIONAL {\
+          ?FormerBand dbo:formerBandMember ?Artist .\
+          OPTIONAL {\
+            ?FormerBand dbo:bandMember ?Related3 .\
+            ?Related3 dbp:name ?Related3Name\
+          } .\
+          OPTIONAL {\
+            ?FormerBand dbo:formerBandMember ?Related4 .\
+            ?Related4 dbp:name ?Related4Name\
+          }\
+        }\
+      }"
 
 export default class ArtistSparqlRepository {
   static getByName(name: string): Promise<Artist> {
@@ -53,63 +98,69 @@ export default class ArtistSparqlRepository {
     var artist: Artist = new Artist();
 
     artist.name = name;
-    var currentBandsPromise =  client
-      .query(currentBandsQuery)
+    var membersPromise = client
+      .query(bandMemberQuery)
       .bind('ArtistName', "\"" + name + "\"@en")
       .executeAsync()
       .then(results => {
-        for (var band of results.results.bindings) {
-          if (!artist.currentBands) {
-            artist.currentBands = [];
-          }
-          artist.currentBands.push(band.Name.value);
+        for (var result of results.results.bindings) {
+          artist.currentBands =  artist.currentBands ? artist.currentBands : [];
+          artist.pastBands =  artist.pastBands ? artist.pastBands : [];
+          artist.currentMembers =  artist.currentMembers ? artist.currentMembers : [];
+          artist.pastMembers =  artist.pastMembers ? artist.pastMembers : [];
+
+          result.BandName && artist.currentBands.push(result.BandName.value);
+          result.FormerBandName && artist.pastBands.push(result.FormerBandName.value);
+          result.MemberName && artist.currentMembers.push(result.MemberName.value);
+          result.FormerMemberName && artist.pastMembers.push(result.FormerMemberName.value);
         }
+
+        artist.currentBands = _.uniq(artist.currentBands);
+        artist.pastBands = _.uniq(artist.pastBands);
+        artist.currentMembers = _.uniq(artist.currentMembers);
+        artist.pastMembers = _.uniq(artist.pastMembers);
         return artist;
       });
 
-    var pastBandsPromise =  client
-      .query(pastBandsQuery)
+    var bandRelatedPromise = client
+      .query(bandRelatedQuery)
       .bind('ArtistName', "\"" + name + "\"@en")
       .executeAsync()
       .then(results => {
-        for (var band of results.results.bindings) {
-          if (!artist.pastBands) {
-            artist.pastBands = [];
-          }
-          artist.pastBands.push(band.Name.value);
+        for (var result of results.results.bindings) {
+          artist.relatedArtists = artist.relatedArtists ? artist.relatedArtists : [];
+
+          result.Related1Name && artist.relatedArtists.push(result.Related1Name.value);
+          result.Related2Name && artist.relatedArtists.push(result.Related2Name.value);
+          result.Related3Name && artist.relatedArtists.push(result.Related3Name.value);
+          result.Related4Name && artist.relatedArtists.push(result.Related4Name.value);
         }
+
+        artist.relatedArtists = _.uniq(artist.relatedArtists);
+        artist.relatedArtists = _.filter(artist.relatedArtists, related => !(related == name));
         return artist;
       });
 
-    var currentMembersPromise =  client
-      .query(currentMembersQuery)
+    var artistRelatedPromise = client
+      .query(artistRelatedQuery)
       .bind('ArtistName', "\"" + name + "\"@en")
       .executeAsync()
       .then(results => {
-        for (var band of results.results.bindings) {
-          if (!artist.currentMembers) {
-            artist.currentMembers = [];
-          }
-          artist.currentMembers.push(band.Name.value);
+        for (var result of results.results.bindings) {
+          artist.relatedArtists = artist.relatedArtists ? artist.relatedArtists : [];
+
+          result.Related1Name && artist.relatedArtists.push(result.Related1Name.value);
+          result.Related2Name && artist.relatedArtists.push(result.Related2Name.value);
+          result.Related3Name && artist.relatedArtists.push(result.Related3Name.value);
+          result.Related4Name && artist.relatedArtists.push(result.Related4Name.value);
         }
+
+        artist.relatedArtists = _.uniq(artist.relatedArtists);
+        artist.relatedArtists = _.filter(artist.relatedArtists, related => !(related == name));
         return artist;
       });
 
-    var pastMembersPromise =  client
-      .query(pastMembersQuery)
-      .bind('ArtistName', "\"" + name + "\"@en")
-      .executeAsync()
-      .then(results => {
-        for (var band of results.results.bindings) {
-          if (!artist.pastMembers) {
-            artist.pastMembers = [];
-          }
-          artist.pastMembers.push(band.Name.value);
-        }
-        return artist;
-      });
-
-    return Promise.all([currentBandsPromise, pastBandsPromise, currentMembersPromise, pastMembersPromise]).then(() => {
+    return Promise.all([membersPromise, bandRelatedPromise, artistRelatedPromise]).then(() => {
       return artist;
     });
   }

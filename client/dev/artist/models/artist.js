@@ -8,6 +8,7 @@ angular.module('MusicDB')
       this.pastMembers = [];
       this.currentBands = [];
       this.pastBands = [];
+      this.relatedArtists = [];
 
       angular.extend(this, artist);
     };
