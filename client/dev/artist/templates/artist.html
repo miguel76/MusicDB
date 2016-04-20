@@ -1,0 +1,86 @@
+<div class="container">
+
+  <div class="artist-panel transition">
+
+    <div class="title-container">
+      <h1 class="text-muted text-center" ng-bind="artistCtrl.artist.name"></h1>
+    </div>
+
+    <hr/>
+
+    <div class="artists-container container-fluid">
+      <div class="row">
+        <div ng-if="artistCtrl.artist.pastMembers.length > 0 || artistCtrl.artist.currentMembers.length" class="col-md-4">
+          <h4>Current Band Members</h4>
+          <table class="table">
+            <tbody>
+              <tr ng-repeat="member in artistCtrl.artist.currentMembers">
+                <td class="text-muted">
+                  <a ng-href="artists/{{member}}" ng-bind="member"></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div ng-if="artistCtrl.artist.pastMembers.length > 0 || artistCtrl.artist.currentMembers.length" class="col-md-4">
+          <h4>Previous Band Members</h4>
+          <table class="table">
+            <tbody>
+            <tr ng-repeat="member in artistCtrl.artist.pastMembers">
+              <td class="text-muted">
+                <a ng-href="artists/{{member}}" ng-bind="member"></a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div ng-if="artistCtrl.artist.pastBands.length > 0 || artistCtrl.artist.currentBands.length" class="col-md-4">
+          <h4>Current Bands</h4>
+          <table class="table">
+            <tbody>
+            <tr ng-repeat="band in artistCtrl.artist.currentBands">
+              <td class="text-muted">
+                <a ng-href="artists/{{band}}" ng-bind="band"></a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div ng-if="artistCtrl.artist.pastBands.length > 0 || artistCtrl.artist.currentBands.length" class="col-md-4">
+          <h4>Previous Bands</h4>
+          <table class="table">
+            <tbody>
+            <tr ng-repeat="band in artistCtrl.artist.pastBands">
+              <td class="text-muted">
+                <a ng-href="artists/{{band}}" ng-bind="band"></a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-4">
+          <h4>Related Artists</h4>
+          <table class="table">
+            <tbody>
+            <tr ng-repeat="artist in artistCtrl.artist.relatedArtists">
+              <td class="text-muted">
+                <a ng-bind="artist"></a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+     <ng-messages for="ArtistForm.name.$error">
+        <ng-message when="required" class="error-msg">Artist field is required</ng-message>
+        <ng-message when="minlength" class="error-msg">Min of 5 chars</ng-message>
+        <ng-message when="maxlength" class="error-msg">Max of 100 chars</ng-message>
+      </ng-messages>
+
+      <br/><br/>
+    </div>
+
+    <hr/>
+  </div>
+</div>

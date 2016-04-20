@@ -1,0 +1,13 @@
+.artist-in-artists:hover .artist-done {
+  opacity: 1;
+}
+
+.artist-done:hover {
+  background-color: red;
+}
+
+
+.artist-done:hover {
+  background-color: rgba(228, 43, 43, 1);
+  color: #fff;
+}

@@ -1,0 +1,11 @@
+{
+  "generator-ng-fullstack": {
+    "username": "sramirezayuso",
+    "appName": "MusicDB",
+    "stack": "fullstack",
+    "server": "node",
+    "client": "ng1",
+    "transpilerServer": "typescript",
+    "secure": false
+  }
+}
