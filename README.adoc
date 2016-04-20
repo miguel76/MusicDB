@@ -1,0 +1,20 @@
+MusicDB
+=======
+
+.Build & Run
+* Install Dependencies
+
+ $ bower install
+
+ $ npm install
+
+* Compile TypeScript
+
+ $ tsc
+
+* Run
+
+ $ npm start
+
+Server runs on port 3333 by default.
+Try http://localhost:3333/artists/Arctic%20Monkeys

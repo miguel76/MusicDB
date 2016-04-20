@@ -1,9 +1,9 @@
 {
-  "name": "MusicDB",
-  "main": "MusicDB.js",
+  "name": "music-db",
+  "main": "musicDB.js",
   "version": "0.0.1",
   "homepage": "https://github.com//MusicDB",
-  "authors": ["sramirezayuso <email>"],
+  "authors": ["sramirezayuso <sramirezayuso@gmail.com>"],
   "description": "desc",
   "keywords": [],
   "license": "MIT",

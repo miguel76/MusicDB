@@ -10,6 +10,12 @@ var endpoint = 'http://dbpedia.org/sparql';
 
 //var endpoint = 'http://localhost:8080/openrdf-sesame/repositories/test';
 
+//var updateEndpoint = 'http://localhost:8080/openrdf-sesame/repositories/test/statements';
+
+var insertQuery = "INSERT DATA {\
+    ?Band <http://dbpedia.org/ontology/bandMember> ?Member .\
+  }";
+
 var bandMemberQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
@@ -95,6 +101,25 @@ var artistRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       }"
 
 export default class ArtistSparqlRepository {
+
+  static addToBand(member: string, band: string) : void {
+
+    var client = Promise.promisifyAll(new SparqlClient(endpoint));
+    var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
+
+    //Query to get resource from name for artist and band
+
+    var insertPromise = updateClient
+      .query(insertQuery)
+      .bind('Band', band)
+      .bind('Member', member)
+      .executeAsync()
+      .then(results => {
+        console.log("asdasd");
+        console.log(results);
+      });
+  }
+
   static getByName(name: string): Promise<Artist> {
     var client = Promise.promisifyAll(new SparqlClient(endpoint));
     var artist: Artist = new Artist();
