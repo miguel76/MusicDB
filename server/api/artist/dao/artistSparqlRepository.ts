@@ -8,10 +8,12 @@ var SparqlClient = require('sparql-client');
 
 var endpoint = 'http://dbpedia.org/sparql';
 
+//var endpoint = 'http://localhost:8080/openrdf-sesame/repositories/test';
+
 var bandMemberQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT DISTINCT ?BandName, ?FormerBandName, ?MemberName, ?FormerMemberName WHERE {\
+      SELECT DISTINCT ?BandName ?FormerBandName ?MemberName ?FormerMemberName WHERE {\
         ?Artist dbp:name ?ArtistName .\
         FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
         OPTIONAL {\
@@ -35,7 +37,7 @@ var bandMemberQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
 var bandRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT DISTINCT ?Related1Name, ?Related2Name, ?Related3Name, ?Related4Name WHERE {\
+      SELECT DISTINCT ?Related1Name ?Related2Name ?Related3Name ?Related4Name WHERE {\
         ?Artist dbp:name ?ArtistName .\
         FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
         OPTIONAL {\
@@ -65,7 +67,7 @@ var bandRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
 var artistRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
-      SELECT DISTINCT ?Related1Name, ?Related2Name, ?Related3Name, ?Related4Name WHERE {\
+      SELECT DISTINCT ?Related1Name ?Related2Name ?Related3Name ?Related4Name WHERE {\
         ?Artist dbp:name ?ArtistName .\
         FILTER (EXISTS {?Artist rdf:type dbo:MusicalArtist} || EXISTS {?Artist rdf:type dbo:Band})\
         OPTIONAL {\
