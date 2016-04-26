@@ -1,1 +1,1 @@
-{"version":3,"file":"artist.js","sourceRoot":"","sources":["artist.ts"],"names":[],"mappings":"AAAA,YAAY,CAAC;AAEb;IAAA;IAOA,CAAC;IAAD,aAAC;AAAD,CAAC,AAPD,IAOC;AAPD;wBAOC,CAAA"}
+{"version":3,"file":"artist.js","sourceRoot":"","sources":["artist.ts"],"names":["Artist","Artist.constructor"],"mappings":"AAAA,YAAY,CAAC;AAEb;IAAAA;IAOAC,CAACA;IAADD,aAACA;AAADA,CAACA,AAPD,IAOC;AAPD;wBAOC,CAAA"}

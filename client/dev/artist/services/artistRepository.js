@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('MusicDB')
-  .factory('ArtistRepository', ['$q', 'Artist', 'ArtistResource', function($q, Artist, ArtistResource) {
+  .factory('ArtistRepository', function($q, Artist, ArtistResource, BandMemberResource) {
 
     function getByName(name) {
       var _onSuccess = function(artist) {
@@ -23,30 +23,24 @@ angular.module('MusicDB')
         .catch(_onError);
     }
 
-    function create(artist) {
-      if (!angular.isObject(artist) || !(artist instanceof Artist) || !artist.isValid()) {
-        return $q.reject(new TypeError('Invalid artist to be created.'));
-      }
+    function addToBand(band, member) {
 
-      var _onSuccess = function(artist) {
-        return new Artist(artist);
+      var _onSuccess = function() {
+        return;
       };
 
       var _onError = function(error) {
         return $q.reject(error);
       };
 
-      return ArtistResource
-        .save(artist)
+      return BandMemberResource
+        .save({band: band, member: member})
         .$promise
         .then(_onSuccess)
         .catch(_onError);
     }
 
-    function remove(id) {
-      if (!angular.isString(id)) {
-        return $q.reject(new TypeError('Invalid id for deletion.'));
-      }
+    function removeFromBand(band, member) {
 
       var _onSuccess = function() {
         return;
@@ -56,8 +50,8 @@ angular.module('MusicDB')
         return $q.reject(error);
       }
 
-      return ArtistResource
-        .delete({id: id})
+      return BandMemberResource
+        .delete({band: band, member: member})
         .$promise
         .then(_onSuccess)
         .catch(_onError)
@@ -65,8 +59,8 @@ angular.module('MusicDB')
 
     return {
       getByName: getByName,
-      create: create,
-      remove: remove
+      addToBand: addToBand,
+      removeFromBand: removeFromBand
     };
-  }]);
+  });
 

@@ -3,11 +3,19 @@ var artist_1 = require('../model/artist');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var SparqlClient = require('sparql-client');
-var endpoint = 'http://dbpedia.org/sparql';
-//var endpoint = 'http://localhost:8080/openrdf-sesame/repositories/test';
-//var updateEndpoint = 'http://localhost:8080/openrdf-sesame/repositories/test/statements';
+//var endpoint = 'http://dbpedia.org/sparql';
+var endpoint = 'http://localhost:8080/openrdf-sesame/repositories/test';
+var updateEndpoint = 'http://localhost:8080/openrdf-sesame/repositories/test/statements';
 var insertQuery = "INSERT DATA {\
     ?Band <http://dbpedia.org/ontology/bandMember> ?Member .\
+  }";
+var deleteQuery = "DELETE {\
+    ?Band <http://dbpedia.org/ontology/bandMember> ?Member .\
+  }";
+var itemsQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
+  SELECT DISTINCT ?Member ?Band WHERE{\
+    ?Member dbp:name ?MemberName .\
+    ?Band dbp:name ?BandName .\
   }";
 var bandMemberQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
@@ -93,20 +101,6 @@ var artistRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
 var ArtistSparqlRepository = (function () {
     function ArtistSparqlRepository() {
     }
-    ArtistSparqlRepository.addToBand = function (member, band) {
-        var client = Promise.promisifyAll(new SparqlClient(endpoint));
-        var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
-        //Query to get resource from name for artist and band
-        var insertPromise = updateClient
-            .query(insertQuery)
-            .bind('Band', band)
-            .bind('Member', member)
-            .executeAsync()
-            .then(function (results) {
-            console.log("asdasd");
-            console.log(results);
-        });
-    };
     ArtistSparqlRepository.getByName = function (name) {
         var client = Promise.promisifyAll(new SparqlClient(endpoint));
         var artist = new artist_1.default();
@@ -171,8 +165,64 @@ var ArtistSparqlRepository = (function () {
             return artist;
         });
     };
+    ArtistSparqlRepository.addToBand = function (memberName, bandName) {
+        var client = Promise.promisifyAll(new SparqlClient(endpoint));
+        var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
+        client
+            .query(itemsQuery)
+            .bind('BandName', "\"" + bandName + "\"@en")
+            .bind('MemberName', "\"" + memberName + "\"@en")
+            .executeAsync()
+            .then(function (results) {
+            var member = [];
+            var band = [];
+            for (var _i = 0, _a = results.results.bindings; _i < _a.length; _i++) {
+                var result = _a[_i];
+                member.push(result.Member.value);
+                band.push(result.Band.value);
+            }
+            member = _.uniq(member)[0];
+            band = _.uniq(band)[0];
+            updateClient
+                .query(insertQuery)
+                .bind('Band', band)
+                .bind('Member', member)
+                .executeAsync()
+                .then(function () {
+                return {};
+            });
+        });
+    };
+    ArtistSparqlRepository.removeFromBand = function (memberName, bandName) {
+        var client = Promise.promisifyAll(new SparqlClient(endpoint));
+        var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
+        client
+            .query(itemsQuery)
+            .bind('BandName', "\"" + bandName + "\"@en")
+            .bind('MemberName', "\"" + memberName + "\"@en")
+            .executeAsync()
+            .then(function (results) {
+            var member = [];
+            var band = [];
+            for (var _i = 0, _a = results.results.bindings; _i < _a.length; _i++) {
+                var result = _a[_i];
+                member.push(result.Member.value);
+                band.push(result.Band.value);
+            }
+            member = _.uniq(member)[0];
+            band = _.uniq(band)[0];
+            updateClient
+                .query(deleteQuery)
+                .bind('Band', band)
+                .bind('Member', member)
+                .executeAsync()
+                .then(function () {
+                return {};
+            });
+        });
+    };
     return ArtistSparqlRepository;
-}());
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ArtistSparqlRepository;
 //# sourceMappingURL=artistSparqlRepository.js.map

@@ -15,8 +15,9 @@
           <table class="table">
             <tbody>
               <tr ng-repeat="member in artistCtrl.artist.currentMembers">
-                <td class="text-muted">
+                <td class="text-muted artist-in-artists">
                   <a ng-href="artists/{{member}}" ng-bind="member"></a>
+                  <div class="artist-done transition" ng-click="artistCtrl.removeFromBand(artistCtrl.artist.name, member)">x</div>
                 </td>
               </tr>
             </tbody>
@@ -27,7 +28,7 @@
           <table class="table">
             <tbody>
             <tr ng-repeat="member in artistCtrl.artist.pastMembers">
-              <td class="text-muted">
+              <td class="text-muted artist-in-artists">
                 <a ng-href="artists/{{member}}" ng-bind="member"></a>
               </td>
             </tr>
@@ -39,8 +40,9 @@
           <table class="table">
             <tbody>
             <tr ng-repeat="band in artistCtrl.artist.currentBands">
-              <td class="text-muted">
+              <td class="text-muted artist-in-artists">
                 <a ng-href="artists/{{band}}" ng-bind="band"></a>
+                <div class="artist-done transition" ng-click="artistCtrl.removeFromBand(band, artistCtrl.artist.name)">x</div>
               </td>
             </tr>
             </tbody>
@@ -51,7 +53,7 @@
           <table class="table">
             <tbody>
             <tr ng-repeat="band in artistCtrl.artist.pastBands">
-              <td class="text-muted">
+              <td class="text-muted artist-in-artists">
                 <a ng-href="artists/{{band}}" ng-bind="band"></a>
               </td>
             </tr>

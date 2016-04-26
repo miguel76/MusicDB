@@ -12,6 +12,6 @@ var Routes = (function () {
         app.use('/', router);
     };
     return Routes;
-}());
+})();
 exports.Routes = Routes;
 //# sourceMappingURL=index.js.map

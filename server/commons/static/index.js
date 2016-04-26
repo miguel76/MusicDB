@@ -10,6 +10,6 @@ var StaticDispatcher = (function () {
             .pipe(res);
     };
     return StaticDispatcher;
-}());
+})();
 exports.StaticDispatcher = StaticDispatcher;
 //# sourceMappingURL=index.js.map

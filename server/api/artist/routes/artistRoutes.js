@@ -5,15 +5,14 @@ var ArtistRoutes = (function () {
     }
     ArtistRoutes.init = function (router) {
         router
-            .route('/api/artists')
-            .get(artistController_1.ArtistController.getAll)
-            .post(artistController_1.ArtistController.createArtist);
-        router
             .route('/api/artists/:name')
-            .get(artistController_1.ArtistController.getByName)
-            .delete(artistController_1.ArtistController.deleteArtist);
+            .get(artistController_1.ArtistController.getByName);
+        router
+            .route('/api/artists/:band/:member')
+            .post(artistController_1.ArtistController.addToBand)
+            .delete(artistController_1.ArtistController.removeFromBand);
     };
     return ArtistRoutes;
-}());
+})();
 exports.ArtistRoutes = ArtistRoutes;
 //# sourceMappingURL=artistRoutes.js.map

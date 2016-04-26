@@ -7,13 +7,12 @@ import {ArtistController} from '../controller/artistController';
 export class ArtistRoutes {
     static init(router: express.Router) {
       router
-        .route('/api/artists')
-        .get(ArtistController.getAll)
-        .post(ArtistController.createArtist);
+        .route('/api/artists/:name')
+        .get(ArtistController.getByName);
 
       router
-        .route('/api/artists/:name')
-        .get(ArtistController.getByName)
-        .delete(ArtistController.deleteArtist);
+        .route('/api/artists/:band/:member')
+        .post(ArtistController.addToBand)
+        .delete(ArtistController.removeFromBand);
     }
 }

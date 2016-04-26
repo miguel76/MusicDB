@@ -6,15 +6,25 @@ import * as _ from 'lodash'
 
 var SparqlClient = require('sparql-client');
 
-var endpoint = 'http://dbpedia.org/sparql';
+//var endpoint = 'http://dbpedia.org/sparql';
 
-//var endpoint = 'http://localhost:8080/openrdf-sesame/repositories/test';
+var endpoint = 'http://localhost:8080/openrdf-sesame/repositories/test';
 
-//var updateEndpoint = 'http://localhost:8080/openrdf-sesame/repositories/test/statements';
+var updateEndpoint = 'http://localhost:8080/openrdf-sesame/repositories/test/statements';
 
 var insertQuery = "INSERT DATA {\
     ?Band <http://dbpedia.org/ontology/bandMember> ?Member .\
   }";
+
+var deleteQuery = "DELETE {\
+    ?Band <http://dbpedia.org/ontology/bandMember> ?Member .\
+  }";
+
+var itemsQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
+  SELECT DISTINCT ?Member ?Band WHERE{\
+    ?Member dbp:name ?MemberName .\
+    ?Band dbp:name ?BandName .\
+  }"
 
 var bandMemberQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
       PREFIX dbo: <http://dbpedia.org/ontology/>\
@@ -102,24 +112,6 @@ var artistRelatedQuery = "PREFIX dbp: <http://dbpedia.org/property/>\
 
 export default class ArtistSparqlRepository {
 
-  static addToBand(member: string, band: string) : void {
-
-    var client = Promise.promisifyAll(new SparqlClient(endpoint));
-    var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
-
-    //Query to get resource from name for artist and band
-
-    var insertPromise = updateClient
-      .query(insertQuery)
-      .bind('Band', band)
-      .bind('Member', member)
-      .executeAsync()
-      .then(results => {
-        console.log("asdasd");
-        console.log(results);
-      });
-  }
-
   static getByName(name: string): Promise<Artist> {
     var client = Promise.promisifyAll(new SparqlClient(endpoint));
     var artist: Artist = new Artist();
@@ -190,5 +182,71 @@ export default class ArtistSparqlRepository {
     return Promise.all([membersPromise, bandRelatedPromise, artistRelatedPromise]).then(() => {
       return artist;
     });
+  }
+
+  static addToBand(memberName: string, bandName: string) : void {
+
+    var client = Promise.promisifyAll(new SparqlClient(endpoint));
+    var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
+
+    client
+      .query(itemsQuery)
+      .bind('BandName', "\"" + bandName + "\"@en")
+      .bind('MemberName', "\"" + memberName + "\"@en")
+      .executeAsync()
+      .then(results => {
+        var member = [];
+        var band = [];
+
+        for (var result of results.results.bindings) {
+          member.push(result.Member.value);
+          band.push(result.Band.value);
+        }
+
+        member = _.uniq(member)[0];
+        band = _.uniq(band)[0];
+
+        updateClient
+          .query(insertQuery)
+          .bind('Band', band)
+          .bind('Member', member)
+          .executeAsync()
+          .then(() => {
+            return {};
+          });
+      });
+  }
+
+  static removeFromBand(memberName: string, bandName: string) : void {
+
+    var client = Promise.promisifyAll(new SparqlClient(endpoint));
+    var updateClient = Promise.promisifyAll(new SparqlClient(updateEndpoint));
+
+    client
+      .query(itemsQuery)
+      .bind('BandName', "\"" + bandName + "\"@en")
+      .bind('MemberName', "\"" + memberName + "\"@en")
+      .executeAsync()
+      .then(results => {
+        var member = [];
+        var band = [];
+
+        for (var result of results.results.bindings) {
+          member.push(result.Member.value);
+          band.push(result.Band.value);
+        }
+
+        member = _.uniq(member)[0];
+        band = _.uniq(band)[0];
+
+        updateClient
+          .query(deleteQuery)
+          .bind('Band', band)
+          .bind('Member', member)
+          .executeAsync()
+          .then(() => {
+            return {};
+          });
+      });
   }
 }

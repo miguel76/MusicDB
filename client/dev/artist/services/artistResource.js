@@ -1,6 +1,11 @@
 'use strict';
 
 angular.module('MusicDB')
-  .factory('ArtistResource', ['$resource', function($resource) {
+
+  .factory('BandMemberResource', function($resource) {
+    return $resource('/api/artists/:band/:member', {band: '@band', member: "@member"}, {});
+  })
+
+  .factory('ArtistResource', function($resource) {
     return $resource('/api/artists/:name', {name: '@name'}, {});
-  }]);
+  });

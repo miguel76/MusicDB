@@ -6,12 +6,19 @@ angular.module('MusicDB')
 
     self.artist = null;
 
-    self.updateArtist = function(name, pastMembers, currentMembers) {
+    self.addToBand = function(band, member) {
       ArtistRepository
-        .deleteArtist(id)
+        .addToBand(band, member)
         .then(_getArtist)
         .catch($log.error);
-    }
+    };
+
+    self.removeFromBand = function(band, member) {
+      ArtistRepository
+        .removeFromBand(band, member)
+        .then(_getArtist)
+        .catch($log.error);
+    };
 
     var _getArtist = function(name) {
       var _onSuccess = function(artist) {

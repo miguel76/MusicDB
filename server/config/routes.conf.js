@@ -17,6 +17,6 @@ var RoutesConfig = (function () {
         application.use(helmet());
     };
     return RoutesConfig;
-}());
+})();
 exports.RoutesConfig = RoutesConfig;
 //# sourceMappingURL=routes.conf.js.map
